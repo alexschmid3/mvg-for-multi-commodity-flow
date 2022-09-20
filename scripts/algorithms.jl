@@ -201,7 +201,7 @@ function multivariablegeneration!(commArcSet, A_plus_k, A_minus_k, onearcatatime
 
 	fullalgtime = time() - fullalgstarttime - parallel_time
 
-	return getobjectivevalue(m), mvg_iteration, commArcSet, A_plus_k, A_minus_k, smp_time, mvgsp_time_par, fullalgtime
+	return getobjectivevalue(m), mvg_iteration, commArcSet, A_plus_k, A_minus_k, smp_time, mvgsp_time_par, fullalgtime, x
 
 end
 
@@ -333,11 +333,15 @@ function pathbasedcolumngeneration!(pathSet, pathcost, delta)
 				global y[k,p] = @variable(m, lower_bound = 0) #, upper_bound = 1)
 				set_name(y[k,p], string("y[",k,",",p,"]")) 
 				set_objective_function(m, objective_function(m) + pathcost[k][p] * q[k] * y[k,p])
-				for a in 1:numarcs
-					set_coefficient(rmpconstraints.con_arccapacity[a], y[k,p], delta[k,a,p] * q[k])
+				for a in shortestpatharcs
+					set_coefficient(rmpconstraints.con_arccapacity[a], y[k,p], q[k])
 				end
-				for n in nodes, a in union(A_plus[n], A_minus[n])
-					set_coefficient(rmpconstraints.con_nodecapacity[n], y[k,p], delta[k,a,p] * q[k])
+				for n in nodes
+					totalcoeff = 0
+					for a in intersect(shortestpatharcs, union(A_plus[n], A_minus[n]))
+						totalcoeff += q[k]
+					end
+					set_coefficient(rmpconstraints.con_nodecapacity[n], y[k,p], totalcoeff)
 				end
 				set_coefficient(rmpconstraints.con_assignment[k], y[k,p], 1.0)
 				
@@ -365,7 +369,7 @@ function pathbasedcolumngeneration!(pathSet, pathcost, delta)
 
 	fullalgtime = time() - fullalgstarttime - parallel_time
 
-	return getobjectivevalue(m), pbcg_iteration, pathSet, pathcost, delta, rmp_time, pp_time_par, fullalgtime
+	return getobjectivevalue(m), pbcg_iteration, pathSet, pathcost, delta, rmp_time, pp_time_par, fullalgtime, y
 
 end
 
