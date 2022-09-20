@@ -56,7 +56,7 @@ writeresults("svg", svg_lp, svg_obj, smp_time, svgsp_time_par, svgip_time, svg_f
 #----------------------------------------- PBCG ----------------------------------------#
 
 delta, pathcost, pathSet = orderpathinitialization(c_cg)
-pbcg_lp2, pbcg_iterations2, pathSet_converged2, pathcost_converged2, delta_converged2, rmp_time2, pp_time_par2, pbcg_fulltime2, y_pb2 = pathbasedcolumngeneration!(pathSet, pathcost, delta)
+pbcg_lp, pbcg_iterations, pathSet_converged, pathcost_converged, delta_converged, rmp_time, pp_time_par, pbcg_fulltime, y_pb = pathbasedcolumngeneration!(pathSet, pathcost, delta)
 pbcg_obj, pbcgip_time = solvepathbasedmcfmodel(0, pathSet_converged, pathcost_converged, delta_converged)
 writeresults("pbcg", pbcg_lp, pbcg_obj, rmp_time, pp_time_par, pbcgip_time, pbcg_fulltime, pbcg_iterations, 0, sum(length(pathSet[k]) for k in commodities), 0)
 
