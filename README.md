@@ -1,1 +1,1 @@
-# mvg-for-multi-commodity-flow
+# Multi-variable generation for the multi-commodity flow problem
