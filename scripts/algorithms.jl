@@ -8,7 +8,7 @@ function solvemcfmodel(lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip)
 	#lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip = 1, commArcSet_converged, A_plus_k_converged, A_minus_k_converged, c_cg
 
 	m = Model(Gurobi.Optimizer)
-	set_optimizer_attribute(m, "TimeLimit", 60*60*95)
+	set_optimizer_attribute(m, "TimeLimit", 60*60)
 	set_optimizer_attribute(m, "OutputFlag", 0)
 	set_optimizer_attribute(m, "MIPGap", 0.01)
 
@@ -18,7 +18,7 @@ function solvemcfmodel(lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip)
 		@variable(m, x[k in commodities, a in commArcSet[k]], Bin)
 	end
 
-	@objective(m, Min, sum(sum(c_cg[a,k] * q[k] * x[k,a] for a in commArcSet[k]) for k in commodities) )
+	@objective(m, Min, sum(sum(c_ip[a,k] * q[k] * x[k,a] for a in commArcSet[k]) for k in commodities) )
 
 	@constraint(m, arccapacity[a in 1:numarcs], sum(q[k] * x[k, a] for k in commodities if a in commArcSet[k]) <= d[a])
 	@constraint(m, flowbalance[k in commodities, n in nodes], sum(x[k, a] for a in A_plus_k[k, n]) - sum(x[k, a] for a in A_minus_k[k, n]) == b[n,k])
@@ -378,7 +378,7 @@ end
 function solvepathbasedmcfmodel(lprelaxation_flag, pathSet, pathcost, delta)
 
 	m = Model(Gurobi.Optimizer)
-	set_optimizer_attribute(m, "TimeLimit", 60*60*95)
+	set_optimizer_attribute(m, "TimeLimit", 60*60)
 	set_optimizer_attribute(m, "OutputFlag", 0)
 	set_optimizer_attribute(m, "MIPGap", 0.01)
 
