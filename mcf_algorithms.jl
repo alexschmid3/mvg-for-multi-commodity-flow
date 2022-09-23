@@ -6,7 +6,7 @@ include("scripts/algorithms.jl")
 
 #-------------------------------------- PARAMETERS -------------------------------------#
 
-#rowid =  #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+rowid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 paramsfilename = "data/goodinstances.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
 runid = expparms[rowid, 1] 	
@@ -63,11 +63,10 @@ writeresults("pbcg", pbcg_lp, pbcg_obj, rmp_time, pp_time_par, pbcgip_time, pbcg
 #----------------------------------------- IP ------------------------------------------#
 
 commArcSet_full, A_plus_k_full, A_minus_k_full = generatefullarcssets()
-ip_obj, ip_time = solvemcfmodel(0, commArcSet_full, A_plus_k_full, A_minus_k_full, c)
-lp_obj, lp_time = solvemcfmodel(1, commArcSet_full, A_plus_k_full, A_minus_k_full, c)
-writeresults("ip", lp_obj, ip_obj, 0, 0, ip_time, ip_time, 0, sum(length(commArcSet_full[k]) for k in commodities), 0, 0)
+ip_obj, ip_time = solvemcfmodel(0, commArcSet_full, A_plus_k_full, A_minus_k_full, c_cg)
+lp_obj, lp_time = solvemcfmodel(1, commArcSet_full, A_plus_k_full, A_minus_k_full, c_cg)
+writeresults("ip", lp_obj, ip_obj, 0, 0, ip_time, 0, 0, sum(length(commArcSet_full[k]) for k in commodities), 0, 0)
 
 #---------------------------------------------------------------------------------------#
 
 println("Done!")
-
