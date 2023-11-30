@@ -1,0 +1,2 @@
+experiment_id,randomseed,numcom,numnodes,radius,gamma_init,gamma_arc,gamma_node,optgap,numarcs,total_time,goodinstance_flag
+53,90276,300,150,0.15,200,41406.0,200,0.01,1468,3604.989974975586,1

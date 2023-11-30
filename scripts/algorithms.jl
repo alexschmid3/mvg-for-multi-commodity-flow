@@ -26,9 +26,9 @@ function solvemcfmodel(lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip)
 
 	status_ip = optimize!(m)
 
-	println("Objective = ", getobjectivevalue(m), " in ", solve_time(m), " seconds")
+	println("Objective = ", objective_value(m), " in ", solve_time(m), " seconds")
 
-	return getobjectivevalue(m), solve_time(m)
+	return objective_value(m), solve_time(m)
 
 end
 
@@ -110,7 +110,7 @@ function multivariablegeneration!(commArcSet, A_plus_k, A_minus_k, onearcatatime
 		#Solve RMP
 		optimize!(m)
 		smp_time += solve_time(m)
-		rmpobj = getobjectivevalue(m)
+		rmpobj = objective_value(m)
 		println("MVG iteration ", mvg_iteration, " SMP objective = ", rmpobj)
 
 		#Snapshot of current arcs
@@ -201,7 +201,7 @@ function multivariablegeneration!(commArcSet, A_plus_k, A_minus_k, onearcatatime
 
 	fullalgtime = time() - fullalgstarttime - parallel_time
 
-	return getobjectivevalue(m), mvg_iteration, commArcSet, A_plus_k, A_minus_k, smp_time, mvgsp_time_par, fullalgtime, x
+	return objective_value(m), mvg_iteration, commArcSet, A_plus_k, A_minus_k, smp_time, mvgsp_time_par, fullalgtime, x
 
 end
 
@@ -283,7 +283,7 @@ function pathbasedcolumngeneration!(pathSet, pathcost, delta)
 		#Solve RMP
 		optimize!(m)
 		rmp_time += solve_time(m)
-		rmpobj = getobjectivevalue(m)
+		rmpobj = objective_value(m)
 		println("PBCG iteration ", pbcg_iteration, " RMP objective = ", rmpobj)
 
 		#Snapshot of current arcs
@@ -369,7 +369,7 @@ function pathbasedcolumngeneration!(pathSet, pathcost, delta)
 
 	fullalgtime = time() - fullalgstarttime - parallel_time
 
-	return getobjectivevalue(m), pbcg_iteration, pathSet, pathcost, delta, rmp_time, pp_time_par, fullalgtime, y
+	return objective_value(m), pbcg_iteration, pathSet, pathcost, delta, rmp_time, pp_time_par, fullalgtime, y
 
 end
 
@@ -396,9 +396,9 @@ function solvepathbasedmcfmodel(lprelaxation_flag, pathSet, pathcost, delta)
 
 	status_ip = optimize!(m)
 
-	println("Objective = ", getobjectivevalue(m), " in ", solve_time(m), " seconds")
+	println("Objective = ", objective_value(m), " in ", solve_time(m), " seconds")
 
-	return getobjectivevalue(m), solve_time(m)
+	return objective_value(m), solve_time(m)
 
 end
 

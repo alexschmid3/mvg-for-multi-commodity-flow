@@ -1,0 +1,25 @@
+ID,numcommodities,numnodes,radius,numarcs,methodnum,method,lp_obj,ip_obj,vs opt,mp_time,sp_time,ip_time,full_time,iterations,finalarccount,finalpathcount,$|\calK|$ & $|\calN|$ & Instance & Method & Total & VG & IO & Iterations & vs. OPT & Variables \\
+1,200,100,0.2,940,1,Direct IP,1157.055,1161.5,0,0,0,849,,0,188200,0,200 & 100 & 1 & Direct IP & 849 & 0 & 849 & 0 & 0\% & 188200 \\ 
+,,,0.2,940,2,Path-based column generation,1157.055,1171.52,0.008626776,0.688556194,73.3306601,2082,88,17,0,2844, &  &  & Path-based column generation & 2170 & 88 & 2082 & 17 & 0.86\% & 2844 \\ 
+,,,0.2,940,3,Single-variable generation,1157.055,1167.56,0.005217391,33.91016102,1.296226263,41,137,148,25825,0, &  &  & Single-variable generation & 178 & 137 & 41 & 148 & 0.52\% & 25825 \\ 
+,,,0.2,940,4,\textbf{Multi-variable generation},1157.055,1171.03,0.008204907,1.306049585,65.66036129,103,84,16,8840,0, &  &  & \textbf{Multi-variable generation} & \textbf{187} & \textbf{84} & \textbf{103} & \textbf{16} & \textbf{0.82\%} & \textbf{8840} \\ 
+2,,,0.2,1028,1,Direct IP,982.885,987.72,0,0,0,146,,0,205800,0, &  & 2 & Direct IP & 146 & 0 & 146 & 0 & 0\% & 205800 \\ 
+,,,0.2,1028,2,Path-based column generation,982.885,993.98,0.006337829,0.249596834,59.02383757,248,69,15,0,2032, &  &  & Path-based column generation & 317 & 69 & 248 & 15 & 0.63\% & 2032 \\ 
+,,,0.2,1028,3,Single-variable generation,982.885,988.42,0.000708703,44.93271303,1.828569651,9,188,154,26640,0, &  &  & Single-variable generation & 197 & 188 & 9 & 154 & 0.07\% & 26640 \\ 
+,,,0.2,1028,4,\textbf{Multi-variable generation},982.885,988.36,0.000647957,2.524095535,47.06653738,7,63,12,9096,0, &  &  & \textbf{Multi-variable generation} & \textbf{70} & \textbf{63} & \textbf{7} & \textbf{12} & \textbf{0.06\%} & \textbf{9096} \\ 
+3,,,0.2,1030,1,Direct IP,1003.63,1013.2,0,0,0,302,,0,206200,0, &  & 3 & Direct IP & 302 & 0 & 302 & 0 & 0\% & 206200 \\ 
+,,,0.2,1030,2,Path-based column generation,1003.63,1016.1,0.002862219,0.253628254,51.8988359,589,61,13,0,1691, &  &  & Path-based column generation & 650 & 61 & 589 & 13 & 0.29\% & 1691 \\ 
+,,,0.2,1030,3,Single-variable generation,1003.63,101017.12,98.70106593,11.69307518,1.500533581,136,109,127,20892,0, &  &  & Single-variable generation & 245 & 109 & 136 & 127 & 9870.11\% & 20892 \\ 
+,,,0.2,1030,4,\textbf{Multi-variable generation},1003.63,1018.12,0.004855902,0.503231764,39.38693547,25,47,10,5134,0, &  &  & \textbf{Multi-variable generation} & \textbf{72} & \textbf{47} & \textbf{25} & \textbf{10} & \textbf{0.49\%} & \textbf{5134} \\ 
+1,300,150,0.15,1402,1,Direct IP,1584.895,1585.86,0,0,0,1066,,0,420900,0,300 & 150 & 1 & Direct IP & 1066 & 0 & 1066 & 0 & 0\% & 420900 \\ 
+,,,0.15,1402,2,Path-based column generation,1584.895,1589.63,0.002377259,0.271092653,215.5643895,31,248,15,0,2760, &  &  & Path-based column generation & 279 & 248 & 31 & 15 & 0.24\% & 2760 \\ 
+,,,0.15,1402,3,Single-variable generation,1584.895,1587.91,0.001292674,57.00293422,5.522289276,4,527,227,48737,0, &  &  & Single-variable generation & 531 & 527 & 4 & 227 & 0.13\% & 48737 \\ 
+,,,0.15,1402,4,\textbf{Multi-variable generation},1584.895,1588.74,0.001816049,1.39798975,132.8558245,3,159,11,11085,0, &  &  & \textbf{Multi-variable generation} & \textbf{162} & \textbf{159} & \textbf{3} & \textbf{11} & \textbf{0.18\%} & \textbf{11085} \\ 
+2,,,0.15,1394,1,Direct IP,1527.57,1530.41,0,0,0,2742,,0,418500,0, &  & 2 & Direct IP & 2742 & 0 & 2742 & 0 & 0\% & 418500 \\ 
+,,,0.15,1394,2,Path-based column generation,1527.57,1537.82,0.00484184,0.715901852,192.9728465,27,221,15,0,3315, &  &  & Path-based column generation & 248 & 221 & 27 & 15 & 0.48\% & 3315 \\ 
+,,,0.15,1394,3,Single-variable generation,1527.57,1531.83,0.000927856,86.27710748,4.741539955,51,516,204,47835,0, &  &  & Single-variable generation & 567 & 516 & 51 & 204 & 0.09\% & 47835 \\ 
+,,,0.15,1394,4,\textbf{Multi-variable generation},1527.57,1531.67,0.000823309,3.900978327,140.4720833,15,181,12,13256,0, &  &  & \textbf{Multi-variable generation} & \textbf{196} & \textbf{181} & \textbf{15} & \textbf{12} & \textbf{0.08\%} & \textbf{13256} \\ 
+3,,,0.15,1406,1,Direct IP,1894.415,1895.47,0,0,0,584,,0,422100,0, &  & 3 & Direct IP & 584 & 0 & 584 & 0 & 0\% & 422100 \\ 
+,,,0.15,1406,2,Path-based column generation,1894.415,1907.42,0.006304505,1.305474043,249.3293779,20,301,17,0,4358, &  &  & Path-based column generation & 321 & 301 & 20 & 17 & 0.63\% & 4358 \\ 
+,,,0.15,1406,3,Single-variable generation,1894.415,1901.83,0.003355368,117.1091642,6.030186892,181,674,242,54829,0, &  &  & Single-variable generation & 855 & 674 & 181 & 242 & 0.34\% & 54829 \\ 
+,,,0.15,1406,4,\textbf{Multi-variable generation},1894.415,1904.43,0.00472706,3.975356817,185.2573421,21,242,16,18173,0, &  &  & \textbf{Multi-variable generation} & \textbf{263} & \textbf{242} & \textbf{21} & \textbf{16} & \textbf{0.47\%} & \textbf{18173} \\ 

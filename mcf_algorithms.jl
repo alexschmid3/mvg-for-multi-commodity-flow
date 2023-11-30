@@ -6,7 +6,7 @@ include("scripts/algorithms.jl")
 
 #-------------------------------------- PARAMETERS -------------------------------------#
 
-#rowid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+#rowid = 1 #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 paramsfilename = "data/goodinstances.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
 runid = expparms[rowid, 1] 	
@@ -41,7 +41,7 @@ d, qnode = setcapacities_mcf(gamma_arc, gamma_node, q, numarcs, nodes, arcpertur
 
 onearcatatime_flag = 0
 c_cg, d_cg, commArcSet, A_minus_k, A_plus_k, numarcs_dummy = colgeninitialize(c, d, numarcs)
-mvg_lp, mvg_iterations, commArcSet_mvg, A_plus_k_mvg, A_minus_k_mvg, smp_time, mvgsp_time_par, mvg_fulltime, x_mv = multivariablegeneration!(commArcSet, A_plus_k, A_minus_k, onearcatatime_flag, c_cg)
+#=mvg_lp, mvg_iterations, commArcSet_mvg, A_plus_k_mvg, A_minus_k_mvg, smp_time, mvgsp_time_par, mvg_fulltime, x_mv = multivariablegeneration!(commArcSet, A_plus_k, A_minus_k, onearcatatime_flag, c_cg)
 mvg_obj, mvgip_time = solvemcfmodel(0, commArcSet_mvg, A_plus_k_mvg, A_minus_k_mvg, c_cg)
 writeresults("mvg", mvg_lp, mvg_obj, smp_time, mvgsp_time_par, mvgip_time, mvg_fulltime, mvg_iterations, sum(length(commArcSet_mvg[k]) for k in commodities), 0, 1)
 
@@ -59,7 +59,7 @@ delta, pathcost, pathSet = orderpathinitialization(c_cg)
 pbcg_lp, pbcg_iterations, pathSet_converged, pathcost_converged, delta_converged, rmp_time, pp_time_par, pbcg_fulltime, y_pb = pathbasedcolumngeneration!(pathSet, pathcost, delta)
 pbcg_obj, pbcgip_time = solvepathbasedmcfmodel(0, pathSet_converged, pathcost_converged, delta_converged)
 writeresults("pbcg", pbcg_lp, pbcg_obj, rmp_time, pp_time_par, pbcgip_time, pbcg_fulltime, pbcg_iterations, 0, sum(length(pathSet[k]) for k in commodities), 0)
-
+=#
 #----------------------------------------- IP ------------------------------------------#
 
 commArcSet_full, A_plus_k_full, A_minus_k_full = generatefullarcssets()

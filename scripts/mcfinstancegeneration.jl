@@ -154,7 +154,7 @@ function findgoodinstance_arctuning(gamma_arc_init, gamma_node, optgap, maxiter,
 	
 	currgamma = gamma_arc_init
 	bestfeasiblegamma = 0
-	bestinfeasiblegamma = 4*gamma_arc_init
+	bestinfeasiblegamma = 50*gamma_arc_init
 	goodinstance_flag = 0
 	iter = 1
 
