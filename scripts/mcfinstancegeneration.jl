@@ -1,6 +1,8 @@
 
 function createinstance_mcf(radius, destdistpercentile, maxdistanceperturb, mindistanceperturb)
 
+	Random.seed!(randomseedval)
+	
 	commodities = 1:numcom
 	nodes = 1:numnodes
 
@@ -79,6 +81,8 @@ function createinstance_mcf(radius, destdistpercentile, maxdistanceperturb, mind
 end
 
 function randomizecapacities_mcf(numarcs, nodes, maxcapacityperturb, mincapacityperturb)
+
+	Random.seed!(randomseedval)
 
 	#Arc and node capacity randomization
 	arcperturbation, nodeperturbation = Dict(), Dict()
@@ -193,7 +197,7 @@ function findgoodinstance_arctuning(gamma_arc_init, gamma_node, optgap, maxiter,
 			bestfeasiblegamma = currgamma
 			println("Good instance = ", total_time)
 			goodinstance_flag = 1
-		elseif termination_status(m) == MOI.TIME_LIMIT
+		elseif (termination_status(m) == MOI.TIME_LIMIT) && (has_values(m))
 			total_time = solve_time(m)
 			bestfeasiblegamma = currgamma
 			println("Good instance = ", total_time)
@@ -203,6 +207,22 @@ function findgoodinstance_arctuning(gamma_arc_init, gamma_node, optgap, maxiter,
 			total_time = "Inf"
 			bestinfeasiblegamma = currgamma
 			currgamma = round((currgamma + bestfeasiblegamma) / 2, digits=0)
+		elseif (termination_status(m) == MOI.TIME_LIMIT) && !(has_values(m))
+			println("Needs more time...")
+			set_optimizer_attribute(m, "TimeLimit", timegoal*10)
+			set_optimizer_attribute(m, "SolutionLimit", 1)
+			optimize!(m)
+			if has_values(m)
+				total_time = solve_time(m)
+				bestfeasiblegamma = currgamma
+				println("Good instance = ", total_time)
+				goodinstance_flag = 1
+			else
+				println("Infeasible")
+				total_time = "Inf"
+				bestinfeasiblegamma = currgamma
+				currgamma = round((currgamma + bestfeasiblegamma) / 2, digits=0)
+			end
 		end
 
 		df = DataFrame(experiment_id = [runid],
@@ -247,6 +267,8 @@ function findgoodinstance_nodetuning(gamma_arc, gamma_node_init, optgap, maxiter
 	coordinates, commodities, nodes, arcs, arcLookup, numarcs, A_minus, A_plus, c, b, q, Origin, Destination = createinstance_mcf(radius, destdistpercentile, maxdistanceperturb, mindistanceperturb)
 	arcperturbation, nodeperturbation = randomizecapacities_mcf(numarcs, nodes, maxcapacityperturb, mincapacityperturb)
 
+	objective = 0
+
 	while (goodinstance_flag == 0) & (iter <= maxiter)
 		println("Iteration $iter node gamma = ", currgamma)
 		
@@ -278,13 +300,31 @@ function findgoodinstance_nodetuning(gamma_arc, gamma_node_init, optgap, maxiter
 			bestfeasiblegamma = currgamma
 			println("Good instance = ", total_time)
 			goodinstance_flag = 1
-		elseif termination_status(m) == MOI.TIME_LIMIT
-			total_time = solve_time(m)
-			bestfeasiblegamma = currgamma
-			println("Good instance = ", total_time)
-			goodinstance_flag = 1
+			objective += objective_value(m)
 		elseif (termination_status(m) == MOI.INFEASIBLE_OR_UNBOUNDED) || (termination_status(m) == MOI.INFEASIBLE)
 			println("Infeasible")
+			total_time = "Inf"
+			bestinfeasiblegamma = currgamma
+			currgamma = round((currgamma + bestfeasiblegamma) / 2, digits=0)
+		elseif (termination_status(m) == MOI.TIME_LIMIT) && !(has_values(m))
+			println("Needs more time...")
+			set_optimizer_attribute(m, "TimeLimit", timegoal*10)
+			set_optimizer_attribute(m, "SolutionLimit", 1)
+			optimize!(m)
+			if has_values(m)
+				total_time = solve_time(m)
+				bestfeasiblegamma = currgamma
+				println("Good instance = ", total_time)
+				goodinstance_flag = 1
+				objective += objective_value(m)
+			else
+				println("Infeasible")
+				total_time = "Inf"
+				bestinfeasiblegamma = currgamma
+				currgamma = round((currgamma + bestfeasiblegamma) / 2, digits=0)
+			end
+		else
+			println("Termination status = ", termination_status(m))
 			total_time = "Inf"
 			bestinfeasiblegamma = currgamma
 			currgamma = round((currgamma + bestfeasiblegamma) / 2, digits=0)
@@ -314,6 +354,6 @@ function findgoodinstance_nodetuning(gamma_arc, gamma_node_init, optgap, maxiter
 
 	end
 
-	return currgamma, goodinstance_flag
+	return currgamma, goodinstance_flag, objective
 
 end

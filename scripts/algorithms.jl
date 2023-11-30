@@ -6,10 +6,11 @@ using Base.Iterators: partition
 function solvemcfmodel(lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip)
 
 	#lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip = 1, commArcSet_converged, A_plus_k_converged, A_minus_k_converged, c_cg
+	#lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip = 1, commArcSet_full, A_plus_k_full, A_minus_k_full, c_cg
 
 	m = Model(Gurobi.Optimizer)
 	set_optimizer_attribute(m, "TimeLimit", 60*60)
-	set_optimizer_attribute(m, "OutputFlag", 0)
+	set_optimizer_attribute(m, "OutputFlag", 1)
 	set_optimizer_attribute(m, "MIPGap", 0.01)
 
 	if lprelaxation_flag == 1
@@ -20,7 +21,10 @@ function solvemcfmodel(lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip)
 
 	@objective(m, Min, sum(sum(c_ip[a,k] * q[k] * x[k,a] for a in commArcSet[k]) for k in commodities) )
 
-	@constraint(m, arccapacity[a in 1:numarcs], sum(q[k] * x[k, a] for k in commodities if a in commArcSet[k]) <= d[a])
+	#Force dummy variables
+	#@constraint(m, [k in commodities], x[k,numarcs+k] == 1)
+
+	@constraint(m, arccapacity[a in 1:numarcs], sum(q[k] * x[k, a] for k in commodities if a in commArcSet[k]) <= d[a] + 1000)
 	@constraint(m, flowbalance[k in commodities, n in nodes], sum(x[k, a] for a in A_plus_k[k, n]) - sum(x[k, a] for a in A_minus_k[k, n]) == b[n,k])
 	@constraint(m, nodecapacity[n in nodes], sum(sum(q[k] * x[k, a] for a in setdiff(union(A_plus_k[k, n], A_minus_k[k, n]), numarcs+1:numarcs_dummy)) for k in commodities) <= qnode[n])
 
@@ -419,7 +423,7 @@ end
 
 #----------------------------------------------------------------------------------------------------------#
 
-function writeresults(solutionmethod, lp_obj, ip_obj, mp_time, sp_time, ip_time, full_time, numiter, arccount, pathcount, first_flag)
+function writeresults(filename, solutionmethod, lp_obj, ip_obj, mp_time, sp_time, ip_time, lp_time, full_time, numiter, arccount, pathcount, first_flag)
 
 	#solutionmethod, lp_obj, ip_obj, mp_time, sp_time, ip_time, numiter, arccount, pathcount, first_flag = "mvg", mvg_lp, mvg_obj, smp_time, mvgsp_time_par, mvgip_time, mvg_iterations, sum(length(commArcSet_converged[k]) for k in commodities), 0, 1
 
@@ -434,6 +438,7 @@ function writeresults(solutionmethod, lp_obj, ip_obj, mp_time, sp_time, ip_time,
 				mp_time = [mp_time],
 				sp_time = [sp_time],
 				ip_time = [ip_time],
+				lp_time = [lp_time],
 				full_time = [full_time],
 				iterations = [numiter],
 				finalarccount = [arccount],
@@ -441,9 +446,9 @@ function writeresults(solutionmethod, lp_obj, ip_obj, mp_time, sp_time, ip_time,
 	           )
 
 	if first_flag == 1
-		CSV.write(string("outputs/algorithmcomparison/mcf_exp", runid, ".csv"), df) 
+		CSV.write(filename, df) 
 	else 
-		CSV.write(string("outputs/algorithmcomparison/mcf_exp", runid, ".csv"), df, append=true)
+		CSV.write(filename, df, append=true)
 	end
 
 end

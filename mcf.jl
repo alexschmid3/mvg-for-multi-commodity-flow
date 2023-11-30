@@ -33,8 +33,8 @@ outputfilename = string("outputs/ipruntimes_exp", runid, ".csv")
 
 #---------------------------TUNE GAMMA AND COMPLETE INSTANCE----------------------------#
 
-maxiter = 20
-timegoal1 = 60*10
+maxiter = 30
+timegoal1 = 10*60 
  
 Random.seed!(randomseedval)
 gamma_arc, goodinstance_flag = findgoodinstance_arctuning(gamma_arc_init, gamma_node_init, opt_gap, maxiter, timegoal1, numcom, numnodes, maxorder, minorder, radius, destdistpercentile, maxdistanceperturb, mindistanceperturb, maxcapacityperturb, mincapacityperturb)
@@ -42,7 +42,10 @@ gamma_arc, goodinstance_flag = findgoodinstance_arctuning(gamma_arc_init, gamma_
 timegoal2 = 60*60
 
 Random.seed!(randomseedval)
-gamma_node, goodinstance_flag = findgoodinstance_nodetuning(gamma_arc, gamma_node_init, opt_gap, maxiter, timegoal2, numcom, numnodes, maxorder, minorder, radius, destdistpercentile, maxdistanceperturb, mindistanceperturb, maxcapacityperturb, mincapacityperturb)
+gamma_node, goodinstance_flag, obj = findgoodinstance_nodetuning(gamma_arc, gamma_node_init, opt_gap, maxiter, timegoal2, numcom, numnodes, maxorder, minorder, radius, destdistpercentile, maxdistanceperturb, mindistanceperturb, maxcapacityperturb, mincapacityperturb)
+println("IP obj = ", obj)
+println("gamma_arc = ", gamma_arc)
+println("gamma_node = ", gamma_node)
 
 #---------------------------------------------------------------------------------------#
 

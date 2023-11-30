@@ -6,8 +6,8 @@ include("scripts/algorithms.jl")
 
 #-------------------------------------- PARAMETERS -------------------------------------#
 
-#rowid = 1 #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
-paramsfilename = "data/goodinstances.csv"
+rowid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+paramsfilename = "data/goodinstances2.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
 runid = expparms[rowid, 1] 	
 randomseedval = expparms[rowid, 2] 	
@@ -26,13 +26,13 @@ maxdistanceperturb = 1.1
 mincapacityperturb = 0.5
 maxcapacityperturb = 1.5
 
-outputfilename = string("outputs/allruns_exp", runid, ".csv")
+outputfilename = string("outputs/algos/mcf_exp", runid, ".csv")
 
 time()
 
 #-------------------------------GENERATE RANDOM INSTANCE--------------------------------#
 
-Random.seed!(randomseedval)
+#Random.seed!(randomseedval)
 coordinates, commodities, nodes, arcs, arcLookup, numarcs, A_minus, A_plus, c, b, q, Origin, Destination = createinstance_mcf(radius, destdistpercentile, maxdistanceperturb, mindistanceperturb)
 arcperturbation, nodeperturbation = randomizecapacities_mcf(numarcs, nodes, maxcapacityperturb, mincapacityperturb)
 d, qnode = setcapacities_mcf(gamma_arc, gamma_node, q, numarcs, nodes, arcperturbation, nodeperturbation)
@@ -65,7 +65,8 @@ writeresults("pbcg", pbcg_lp, pbcg_obj, rmp_time, pp_time_par, pbcgip_time, pbcg
 commArcSet_full, A_plus_k_full, A_minus_k_full = generatefullarcssets()
 ip_obj, ip_time = solvemcfmodel(0, commArcSet_full, A_plus_k_full, A_minus_k_full, c_cg)
 lp_obj, lp_time = solvemcfmodel(1, commArcSet_full, A_plus_k_full, A_minus_k_full, c_cg)
-writeresults("ip", lp_obj, ip_obj, 0, 0, ip_time, 0, 0, sum(length(commArcSet_full[k]) for k in commodities), 0, 0)
+
+writeresults(outputfilename,"ip", lp_obj, ip_obj, 0, 0, ip_time, lp_time, 0, 0, sum(length(commArcSet_full[k]) for k in commodities), 0, 1)
 
 #---------------------------------------------------------------------------------------#
 

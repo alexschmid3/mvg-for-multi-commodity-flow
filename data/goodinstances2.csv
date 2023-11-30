@@ -1,0 +1,3 @@
+experiment_id,randomseed,numcom,numnodes,radius,gamma_arc,gamma_node,optgap
+21,290130,200,100,0.3,15000,200,0.001
+2,36787,200,100,0.2,29355,392,0.01
