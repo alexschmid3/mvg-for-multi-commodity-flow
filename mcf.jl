@@ -5,7 +5,7 @@ include("scripts/mcfinstancegeneration.jl")
 
 #-------------------------------GENERATE RANDOM INSTANCE--------------------------------#
 
-runid = 21 #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+runid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 println("runid = $runid")
 paramsfilename = "data/findgoodinstances.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
