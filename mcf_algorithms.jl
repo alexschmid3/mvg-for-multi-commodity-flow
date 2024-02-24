@@ -6,8 +6,8 @@ include("scripts/algorithms.jl")
 
 #-------------------------------------- PARAMETERS -------------------------------------#
 
-rowid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
-paramsfilename = "data/goodinstances2.csv"
+rowid = 1 # ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+paramsfilename = "data/goodinstances3.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
 runid = expparms[rowid, 1] 	
 randomseedval = expparms[rowid, 2] 	

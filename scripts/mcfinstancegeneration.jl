@@ -176,6 +176,7 @@ function findgoodinstance_arctuning(gamma_arc_init, gamma_node, optgap, maxiter,
 		m = Model(Gurobi.Optimizer)
 		set_optimizer_attribute(m, "TimeLimit", timegoal+1)
 		set_optimizer_attribute(m, "OutputFlag", 0)
+		set_optimizer_attribute(m, "LogToConsole", 0)
 		set_optimizer_attribute(m, "MIPGap", optgap)
 		@variable(m, x_ip[k in commodities, a in 1:numarcs], Bin)
 		@objective(m, Min, sum(sum(c[a,k] * q[k] * x_ip[k,a] for a in 1:numarcs) for k in commodities) )
@@ -274,11 +275,12 @@ function findgoodinstance_nodetuning(gamma_arc, gamma_node_init, optgap, maxiter
 		
 		#Randomize capacities
 		d, p = setcapacities_mcf(gamma_arc, currgamma, q, numarcs, nodes, arcperturbation, nodeperturbation)
-
+		
 		#Write corresponding MCF IP
 		m = Model(Gurobi.Optimizer)
 		set_optimizer_attribute(m, "TimeLimit", timegoal+1)
 		set_optimizer_attribute(m, "OutputFlag", 0)
+		set_optimizer_attribute(m, "LogToConsole", 0)
 		set_optimizer_attribute(m, "MIPGap", optgap)
 		@variable(m, x_ip[k in commodities, a in 1:numarcs], Bin)
 		@objective(m, Min, sum(sum(c[a,k] * q[k] * x_ip[k,a] for a in 1:numarcs) for k in commodities) )

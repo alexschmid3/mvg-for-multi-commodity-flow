@@ -5,7 +5,7 @@ include("scripts/mcfinstancegeneration.jl")
 
 #-------------------------------GENERATE RANDOM INSTANCE--------------------------------#
 
-runid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+runid = 7 #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 println("runid = $runid")
 paramsfilename = "data/findgoodinstances.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
@@ -13,8 +13,8 @@ randomseedval = expparms[runid, 2]
 numcom = expparms[runid, 3]
 numnodes = expparms[runid, 4]		
 radius = expparms[runid, 5]	
-gamma_arc_init = expparms[runid, 6]	
-gamma_node_init = expparms[runid, 7]
+gamma_arc_init = 37970.0 #expparms[runid, 6]	
+gamma_node_init = 100.0 #expparms[runid, 7]
 opt_gap = expparms[runid, 8]
 
 println("Seed = ", randomseedval)	
@@ -33,13 +33,13 @@ outputfilename = string("outputs/ipruntimes_exp", runid, ".csv")
 
 #---------------------------TUNE GAMMA AND COMPLETE INSTANCE----------------------------#
 
-maxiter = 30
-timegoal1 = 10*60 
+maxiter = 10
+timegoal1 = 8
  
 Random.seed!(randomseedval)
 gamma_arc, goodinstance_flag = findgoodinstance_arctuning(gamma_arc_init, gamma_node_init, opt_gap, maxiter, timegoal1, numcom, numnodes, maxorder, minorder, radius, destdistpercentile, maxdistanceperturb, mindistanceperturb, maxcapacityperturb, mincapacityperturb)
 
-timegoal2 = 60*60
+timegoal2 = 9
 
 Random.seed!(randomseedval)
 gamma_node, goodinstance_flag, obj = findgoodinstance_nodetuning(gamma_arc, gamma_node_init, opt_gap, maxiter, timegoal2, numcom, numnodes, maxorder, minorder, radius, destdistpercentile, maxdistanceperturb, mindistanceperturb, maxcapacityperturb, mincapacityperturb)
@@ -50,3 +50,5 @@ println("gamma_node = ", gamma_node)
 #---------------------------------------------------------------------------------------#
 
 println("Done!")
+
+1122.23000

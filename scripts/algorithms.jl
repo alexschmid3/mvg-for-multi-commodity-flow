@@ -7,7 +7,7 @@ function solvemcfmodel(lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip)
 
 	#lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip = 1, commArcSet_converged, A_plus_k_converged, A_minus_k_converged, c_cg
 	#lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip = 1, commArcSet_full, A_plus_k_full, A_minus_k_full, c_cg
-
+			
 	m = Model(Gurobi.Optimizer)
 	set_optimizer_attribute(m, "TimeLimit", 60*60)
 	set_optimizer_attribute(m, "OutputFlag", 1)
@@ -23,8 +23,7 @@ function solvemcfmodel(lprelaxation_flag, commArcSet, A_plus_k, A_minus_k, c_ip)
 
 	#Force dummy variables
 	#@constraint(m, [k in commodities], x[k,numarcs+k] == 1)
-
-	@constraint(m, arccapacity[a in 1:numarcs], sum(q[k] * x[k, a] for k in commodities if a in commArcSet[k]) <= d[a] + 1000)
+	@constraint(m, arccapacity[a in 1:numarcs], sum(q[k] * x[k, a] for k in commodities if a in commArcSet[k]) <= d[a])
 	@constraint(m, flowbalance[k in commodities, n in nodes], sum(x[k, a] for a in A_plus_k[k, n]) - sum(x[k, a] for a in A_minus_k[k, n]) == b[n,k])
 	@constraint(m, nodecapacity[n in nodes], sum(sum(q[k] * x[k, a] for a in setdiff(union(A_plus_k[k, n], A_minus_k[k, n]), numarcs+1:numarcs_dummy)) for k in commodities) <= qnode[n])
 
