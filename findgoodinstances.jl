@@ -7,7 +7,6 @@ include("scripts/capacitytuning.jl")
 include("scripts/solvemcfinstance.jl")
 include("scripts/writerunresults.jl")
 include("scripts/multiarcgeneration.jl")
-include("scripts/drawmap.jl")
 
 #-------------------------------PARAMETERS--------------------------------#
 
