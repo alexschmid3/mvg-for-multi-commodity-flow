@@ -55,7 +55,7 @@ function solvemcfinstance(mcfinstance, lprelaxflag, timegoal, nodecapacity_flag,
    
     elseif usage in ["fullsolve", "reducedsolve"]
         
-        if (termination_status(m) == MOI.OPTIMAL) || ((termination_status(m) == MOI.TIME_LIMIT) && (hasvalues(m))  )
+        if (termination_status(m) == MOI.OPTIMAL) || ((termination_status(m) == MOI.TIME_LIMIT) && (has_values(m)) )
             if lprelaxflag == 1
                 println("LP objective = ", objective_value(m))
             elseif lprelaxflag == 0
@@ -69,7 +69,7 @@ function solvemcfinstance(mcfinstance, lprelaxflag, timegoal, nodecapacity_flag,
                 println("IP infeasible")
             end
             return 1e10, [], termination_status(m), solve_time(m), has_values(m)
-        elseif (termination_status(m) == MOI.TIME_LIMIT) && !(hasvalues(m))
+        elseif (termination_status(m) == MOI.TIME_LIMIT) && !(has_values(m))
             if lprelaxflag == 1
                 println("LP infeasible")
             elseif lprelaxflag == 0

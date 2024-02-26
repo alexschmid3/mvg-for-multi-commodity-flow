@@ -43,6 +43,7 @@ function columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 	parallel_time = 0
 	listlength = convert(Int64, ceil(length(mcfinstance.commodities)/4))
 	shuffle_partition(N; chunk_size=listlength) = (collect ∘ partition)(shuffle(1:N), chunk_size)
+	M = preprocessreducedcostsets(mcfinstance)
 
 	#Create the sparse master problem
 	m = Model(Gurobi.Optimizer)

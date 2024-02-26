@@ -12,7 +12,7 @@ include("scripts/solvepathmcfinstance.jl")
 
 #-------------------------------PARAMETERS--------------------------------#
 
-runid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+runid = 90 #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 println("runid = $runid")
 paramsfilename = "data/findgoodinstances_2024.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
@@ -20,8 +20,8 @@ randomseedval = expparms[runid, 2]
 numcom = expparms[runid, 3]
 numnodes = expparms[runid, 4]		
 radius = expparms[runid, 5]	
-gamma_arc_init = expparms[runid, 6]	
-gamma_node_init = expparms[runid, 7]
+gamma_arc_init = 150000	#expparms[runid, 6]	
+gamma_node_init = 938 #expparms[runid, 7]
 opt_gap = expparms[runid, 8]
 
 println("Seed = ", randomseedval)	
@@ -37,13 +37,13 @@ commodities = 1:numcom
 
 #timegoal_arcdict = Dict(100=>15, 200=>45, 400=>60)
 #timegoal_nodedict = Dict(100=>40, 200=>90, 400=>120)
-timegoal_arcdict = Dict(100=>30, 200=>60, 400=>90)
-timegoal_nodedict = Dict(100=>120, 200=>180, 400=>240)
+timegoal_arcdict = Dict(100=>30, 200=>60, 400=>75)
+timegoal_nodedict = Dict(100=>120, 200=>120, 400=>180)
 
 #Time goals for solving MCF instances
 timegoal_arc = timegoal_arcdict[numcom] #numnodes/3 #0*60
 timegoal_node = timegoal_nodedict[numcom] #numnodes/2 #30*60
-maxtuningiterations = 20
+maxtuningiterations = 0 #20
 
 #Algorithm parameters
 iptimelimit = 60*2
