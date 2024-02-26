@@ -20,8 +20,8 @@ randomseedval = expparms[runid, 2]
 numcom = expparms[runid, 3]
 numnodes = expparms[runid, 4]		
 radius = expparms[runid, 5]	
-gamma_arc_init = expparms[runid, 6]	
-gamma_node_init = expparms[runid, 7]
+gamma_arc_init = 5000 #expparms[runid, 6]	
+gamma_node_init = 5000 #expparms[runid, 7]
 opt_gap = expparms[runid, 8]
 
 println("Seed = ", randomseedval)	

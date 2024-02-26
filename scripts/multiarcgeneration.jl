@@ -136,7 +136,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
     fullalgstarttime = time()
 	time1, time2, time3, time4, time5 = 0,0,0,0,0
 
-	while mag_iteration <= 6 #1==1
+	while 1==1
 
 		tempstart = time()
 		#Solve SMP
