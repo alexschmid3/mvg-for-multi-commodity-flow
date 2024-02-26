@@ -54,8 +54,9 @@ outputfilename = string("outputs/mcfalgorithms_exp", runid, ".csv")
 
 #---------------------------GENERATE INSTANCE-----------------------------#
 
+coordinates, commodities, nodes, arcs, arcLookup, numarcs, A_minus, A_plus, c, b, q, Origin, Destination = randomizeinstance(randomseedval)
+arcperturbation, nodeperturbation = randomizeperturbations(numarcs, nodes, randomseedval)
 gamma_arc, gamma_node, mcfinstance, foundgoodinstance_flag = capacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, timegoal_node, maxtuningiterations)
-# gamma_arc, gamma_node, mcfinstance, foundgoodinstance_flag = capacitytuning(30000, 150, 1, 1, 0)
 
 #----------------------------SOLVE INSTANCE-------------------------------#
 

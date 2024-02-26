@@ -62,9 +62,6 @@ end
 
 function arccapacitytuning(gamma_arc_init, gamma_node, timegoal, maxtuningiterations)
 
-    coordinates, commodities, nodes, arcs, arcLookup, numarcs, A_minus, A_plus, c, b, q, Origin, Destination = randomizeinstance(randomseedval)
-    arcperturbation, nodeperturbation = randomizeperturbations(numarcs, nodes, randomseedval)
-
     #Initialize capacity tuning
     currgamma = gamma_arc_init
     goodinstance_flag = 0
@@ -115,9 +112,6 @@ end
 #--------------------------------------------------------------------------------------------#
 
 function nodecapacitytuning(gamma_arc, gamma_node_init, timegoal, maxtuningiterations, startiter)
-
-    coordinates, commodities, nodes, arcs, arcLookup, numarcs, A_minus, A_plus, c, b, q, Origin, Destination = randomizeinstance(randomseedval)
-    arcperturbation, nodeperturbation = randomizeperturbations(numarcs, nodes, randomseedval)
 
     #Initialize capacity tuning
     currgamma = gamma_node_init
