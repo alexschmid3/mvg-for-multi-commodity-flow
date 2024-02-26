@@ -99,7 +99,7 @@ function preprocessreducedcostsets(mcfinstance)
 	end
 
 	M_iota = zeros(mcfinstance.numarcs, numnodes)
-	for k in mcfinstance.commodities, a in 1:mcfinstance.numarcs
+	for a in 1:mcfinstance.numarcs
 		i, j = mcfinstance.arcs[a]
 		M_iota[a, i] -= 1
 		M_iota[a, j] -= 1
@@ -136,7 +136,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
     fullalgstarttime = time()
 	time1, time2, time3, time4, time5 = 0,0,0,0,0
 
-	while 1==1
+	while mag_iteration <= 6 #1==1
 
 		tempstart = time()
 		#Solve SMP
@@ -160,9 +160,9 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 			i, j = mcfinstance.arcs[a]
 			arcredcosts_orig[k,a] = c_mag[a, k] * mcfinstance.q[k] - mcfinstance.q[k] * alpha[a] - beta[k, i] + beta[k, j] - mcfinstance.q[k] * iota[i] - mcfinstance.q[k] * iota[j]
 		end=#
-		arcredcosts = transpose(mcfinstance.c[:, 1] * transpose(mcfinstance.q) - alpha * transpose(mcfinstance.q) + M.beta * transpose(beta) + M.iota * iota * transpose(mcfinstance.q))
+		arcredcosts = transpose(mcfinstance.c[:, 1] * transpose(mcfinstance.q)- alpha * transpose(mcfinstance.q) + M.beta * transpose(beta) + M.iota * iota * transpose(mcfinstance.q))
 		time3 += time() - tempstart
-
+		
 		#Solve MAG subproblem
 		min_rc_list = []
 		addarcs = []
@@ -220,7 +220,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 
 		#Termination criterion
 		tempstart = time()
-		if min_rc >= -0.001
+		if min_rc >= -0.0001
 			println("No negative reduced costs found!")
 			break
 		end
