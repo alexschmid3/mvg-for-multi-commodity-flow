@@ -96,7 +96,7 @@ function arccapacitytuning(gamma_arc_init, gamma_node, timegoal, maxtuningiterat
         goodinstance_flag, total_time, currgamma, bestinfeasiblegamma, bestfeasiblegamma = checkoptimizationoutput(terminationstatus, solvetime, hasvalues, currgamma, bestinfeasiblegamma, bestfeasiblegamma, timegoal)
 
         #Write instance to file
-        writeinstancetofile(iter, currgamma, gamma_node, numarcs, total_time, goodinstance_flag)
+        writeinstancetofile(iter, currgamma, gamma_node, numarcs, total_time, 0.5*goodinstance_flag)
 
         #Iterate
         iter += 1
@@ -171,15 +171,18 @@ function capacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, timegoal_
     gamma_arc, goodinstance_flag_arc, arcmcfinstance, startiter = arccapacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, maxtuningiterations)
     if goodinstance_flag_arc == 1
         gamma_node, goodinstance_flag, finalmcfinstance = nodecapacitytuning(gamma_arc, gamma_node_init, timegoal_node, maxtuningiterations, startiter)
+    elseif gamma_arc > 1e-4
+        println("No good instance found during arc tuning, but proceeding to node tuning")
+        gamma_node, goodinstance_flag, finalmcfinstance = nodecapacitytuning(gamma_arc, gamma_node_init, timegoal_node, maxtuningiterations, startiter) 
     else
-        println("Sorry, no instance found during arc tuning")
+        println("Sorry, no feasible instance found during arc tuning")
         return gamma_arc, gamma_node_init, arcmcfinstance, 0
     end
 
     if goodinstance_flag == 1
         return gamma_arc, gamma_node, finalmcfinstance, goodinstance_flag
     else
-        println("Sorry, no instance found during node tuning")
+        println("Sorry, no good instance found during node tuning")
         return gamma_arc, gamma_node, finalmcfinstance, goodinstance_flag
     end
 
