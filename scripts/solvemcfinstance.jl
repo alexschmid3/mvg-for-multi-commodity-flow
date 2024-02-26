@@ -44,7 +44,7 @@ function solvemcfinstance(mcfinstance, lprelaxflag, timegoal, nodecapacity_flag,
     #Check if needs more time
     if (usage == "tuning") & (termination_status(m) == MOI.TIME_LIMIT) && !(has_values(m))
         println("Needs more time...")
-        set_optimizer_attribute(m, "TimeLimit", timegoal*10)
+        set_optimizer_attribute(m, "TimeLimit", timegoal*3)
         set_optimizer_attribute(m, "SolutionLimit", 1)
         optimize!(m)
     end
