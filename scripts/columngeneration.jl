@@ -49,9 +49,9 @@ function columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 	set_optimizer_attribute(m, "OutputFlag", 0)
 	@variable(m, 0 <= y[k in mcfinstance.commodities, p in pathSet[k]]) #Upper bound redundant
 	@objective(m, Min, sum(sum(pathcost[k][p] * mcfinstance.q[k] * y[k,p] for p in pathSet[k]) for k in mcfinstance.commodities) )
-	@constraint(m, assignment[k in mcfinstance.commodities], sum(y[k,p] for p in pathSet[k]) == 1)
+	@constraint(m, assignment[k in 1:numcom], sum(y[k,p] for p in pathSet[k]) == 1)
 	@constraint(m, arccapacity[a = 1:mcfinstance.numarcs], sum(sum(mcfinstance.q[k] * delta[k,a,p] * y[k,p] for p in pathSet[k]) for k in mcfinstance.commodities) <= mcfinstance.d[a])
-	@constraint(m, nodecapacity[n in mcfinstance.nodes], sum(sum(sum(mcfinstance.q[k] * delta[k,a,p] * y[k,p] for a in union(mcfinstance.A_plus[n], mcfinstance.A_minus[n])) for p in pathSet[k]) for k in mcfinstance.commodities) <= mcfinstance.p[n])
+	@constraint(m, nodecapacity[n in 1:numnodes], sum(sum(sum(mcfinstance.q[k] * delta[k,a,p] * y[k,p] for a in union(mcfinstance.A_plus[n], mcfinstance.A_minus[n])) for p in pathSet[k]) for k in mcfinstance.commodities) <= mcfinstance.p[n])
 
 	fullalgstarttime = time()
 
@@ -73,11 +73,12 @@ function columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 		iota = dual.(nodecapacity)
 
 		#Find arc reduced costs
-		arcredcosts = Dict()
-		for k in mcfinstance.commodities, a in 1:mcfinstance.numarcs
-			i, j = mcfinstance.arcs[a]
-			arcredcosts[k,a] = mcfinstance.c[a, k] * mcfinstance.q[k] - mcfinstance.q[k] * alpha[a] - mcfinstance.q[k] * iota[i] - mcfinstance.q[k] * iota[j]
-		end
+		#arcredcosts = Dict()
+		#for k in mcfinstance.commodities, a in 1:mcfinstance.numarcs
+		#	i, j = mcfinstance.arcs[a]
+		#	arcredcosts[k,a] = mcfinstance.c[a, k] * mcfinstance.q[k] - mcfinstance.q[k] * alpha[a] - mcfinstance.q[k] * iota[i] - mcfinstance.q[k] * iota[j]
+		#end
+        arcredcosts = transpose(mcfinstance.c[:, 1] * transpose(mcfinstance.q) - alpha * transpose(mcfinstance.q) + M.iota * iota * transpose(mcfinstance.q))
 
 		#Solve pricing subproblem
 		min_rc_list = []
@@ -110,7 +111,8 @@ function columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 				#Add new path variable
 				global y[k,p] = @variable(m, lower_bound = 0) #, upper_bound = 1)
 				set_name(y[k,p], string("y[",k,",",p,"]")) 
-				set_objective_function(m, objective_function(m) + pathcost[k][p] * mcfinstance.q[k] * y[k,p])
+				#set_objective_function(m, objective_function(m) + pathcost[k][p] * mcfinstance.q[k] * y[k,p])
+                set_objective_coefficient(m, y[k,p], pathcost[k][p] * mcfinstance.q[k])
 				for a in shortestpatharcs
 					set_normalized_coefficient(arccapacity[a], y[k,p], mcfinstance.q[k])
 				end

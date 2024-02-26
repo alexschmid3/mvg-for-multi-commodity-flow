@@ -89,6 +89,30 @@ end
 
 #--------------------------------------------------------------------------------------------#
 
+function preprocessreducedcostsets(mcfinstance)
+
+	M_beta = zeros(mcfinstance.numarcs, numnodes)
+	for a in 1:mcfinstance.numarcs
+		i, j = mcfinstance.arcs[a]
+		M_beta[a, i] -= 1
+		M_beta[a, j] += 1
+	end
+
+	M_iota = zeros(mcfinstance.numarcs, numnodes)
+	for k in mcfinstance.commodities, a in 1:mcfinstance.numarcs
+		i, j = mcfinstance.arcs[a]
+		M_iota[a, i] -= 1
+		M_iota[a, j] -= 1
+	end
+
+	M = (beta=M_beta, iota=M_iota)
+
+	return M
+
+end
+
+#--------------------------------------------------------------------------------------------#
+
 function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, dummydeletions)
 
 	#Initialize
@@ -97,19 +121,19 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 	parallel_time = 0
 	listlength = convert(Int64, ceil(length(commodities)/4))
 	shuffle_partition(N; chunk_size=listlength) = (collect ∘ partition)(shuffle(1:N), chunk_size)
+	M = preprocessreducedcostsets(mcfinstance)
 
 	#Create the sparse master problem
 	m = Model(Gurobi.Optimizer)
 	set_optimizer_attribute(m, "OutputFlag", 0)
 	@variable(m, 0 <= x[k in commodities, a in magarcs.A[k]]) #Upper bound redundant
 	@objective(m, Min, sum(sum(c_mag[a,k] * mcfinstance.q[k] * x[k,a] for a in magarcs.A[k]) for k in mcfinstance.commodities) )
-	@constraint(m, arccapacity[a = 1:numarcs_dummy], 0 <= d_mag[a])
+	@constraint(m, arccapacity[a = 1:mcfinstance.numarcs], 0 <= mcfinstance.d[a])
 	@constraint(m, flowbalance[k in mcfinstance.commodities, i in mcfinstance.nodes], sum(x[k, a] for a in magarcs.A_plus[k, i]) - sum(x[k, a] for a in magarcs.A_minus[k, i]) == mcfinstance.b[i,k])
-	@constraint(m, nodecapacity[n in mcfinstance.nodes], 0 <= mcfinstance.p[n])
+	@constraint(m, nodecapacity[n in 1:numnodes], 0 <= mcfinstance.p[n])
 
 	#Main loop
     fullalgstarttime = time()
-
 	time1, time2, time3, time4, time5 = 0,0,0,0,0
 
 	while 1==1
@@ -131,25 +155,12 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 
 		#Find arc reduced costs
 		tempstart = time()
-		arcredcosts = Dict()
+		#=arcredcosts_orig = Dict()
 		for k in mcfinstance.commodities, a in 1:mcfinstance.numarcs
 			i, j = mcfinstance.arcs[a]
-			arcredcosts[k,a] = c_mag[a, k] * mcfinstance.q[k] - mcfinstance.q[k] * alpha[a] - beta[k, i] + beta[k, j] - mcfinstance.q[k] * iota[i] - mcfinstance.q[k] * iota[j]
-		end
-		#=
-		#Optimized MCF
-		arcredcosts = zeros()
-		for a in 1:mcfinstance.numarcs
-			arcredcosts[:,a] += c_mag[:, 1] * transpose(mcfinstance.q)
-		end
-		arcredcosts += c_mag[:, 1] * transpose(mcfinstance.q) - alpha * transpose(mcfinstance.q)
-
-		#Optimized relay
-		arcredcosts = zeros(numorders, extendednumarcs)
-		for i in orders
-			arcredcosts[i,:] += c[1:extendednumarcs] + M.alpha[i] * alpha[i,:] + M.beta[i] * beta[i] + M.gamma[i] * gamma[i] + M.psi[i] * psi[i]
-			arcredcosts[i,:] += M.theta * theta + M.nu * nu + M.mu * mu + M.xi * xi
+			arcredcosts_orig[k,a] = c_mag[a, k] * mcfinstance.q[k] - mcfinstance.q[k] * alpha[a] - beta[k, i] + beta[k, j] - mcfinstance.q[k] * iota[i] - mcfinstance.q[k] * iota[j]
 		end=#
+		arcredcosts = transpose(mcfinstance.c[:, 1] * transpose(mcfinstance.q) - alpha * transpose(mcfinstance.q) + M.beta * transpose(beta) + M.iota * iota * transpose(mcfinstance.q))
 		time3 += time() - tempstart
 
 		#Solve MAG subproblem
@@ -165,7 +176,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 			if minreducedcost_k < -0.001
 				for a in shortestpatharcs
 					if !(a in magarcs.A[k])
-                        push!(addarcs, (k,a))
+						push!(addarcs, (k,a))
 						push!(magarcs.A[k], a)
 						i, j = mcfinstance.arcs[a]
 						push!(magarcs.A_plus[k, i], a)
@@ -177,7 +188,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 			push!(dptimelist, time() - thisiterstarttime)
 		end
 
-	 	min_rc = minimum(min_rc_list)
+		min_rc = minimum(min_rc_list)
 
 		#"Parallelize"
 		shuffleddptimes = shuffle_partition(length(mcfinstance.commodities))
@@ -186,25 +197,26 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 		parallel_time += sum(dptimelistsums) -  maximum(dptimelistsums)
 
 		#Add new variables 
-		tempstart = time()
+		tempstart2 = time()
+		println("Length of arcs = ", length(addarcs))
 		for (k,a) in addarcs
-            #Create a new variable for the arc
-            global x[k,a] = @variable(m, lower_bound = 0) #, upper_bound = 1)
-            set_name(x[k,a], string("x[",k,",",a,"]")) 
+			#Create a new variable for the arc
+			global x[k,a] = @variable(m, lower_bound = 0) #, upper_bound = 1)
+			set_name(x[k,a], string("x[",k,",",a,"]")) 
 
-            #Add to the objective
-            set_objective_function(m, objective_function(m) + c_mag[a,k] * mcfinstance.q[k] * x[k,a])
+			#Add to the objective
+			#set_objective_function(m, objective_function(m) + c_mag[a,k] * mcfinstance.q[k] * x[k,a])
+			set_objective_coefficient(m, x[k,a], c_mag[a,k] * mcfinstance.q[k])
 
-            #Add new variable to order constraints
-            i = mcfinstance.arcs[a][1]
-            j = mcfinstance.arcs[a][2]
-            set_normalized_coefficient(arccapacity[a], x[k,a], mcfinstance.q[k])
-            set_normalized_coefficient(flowbalance[k,i], x[k,a], 1.0)
-            set_normalized_coefficient(flowbalance[k,j], x[k,a], -1.0)
-            set_normalized_coefficient(nodecapacity[i], x[k,a], mcfinstance.q[k])
-            set_normalized_coefficient(nodecapacity[j], x[k,a], mcfinstance.q[k])
+			#Add new variable to order constraints
+			i, j = mcfinstance.arcs[a]
+			set_normalized_coefficient(arccapacity[a], x[k,a], mcfinstance.q[k])
+			set_normalized_coefficient(flowbalance[k,i], x[k,a], 1.0)
+			set_normalized_coefficient(flowbalance[k,j], x[k,a], -1.0)
+			set_normalized_coefficient(nodecapacity[i], x[k,a], mcfinstance.q[k])
+			set_normalized_coefficient(nodecapacity[j], x[k,a], mcfinstance.q[k])
 		end
-		time4 += time() - tempstart
+		time4 += time() - tempstart2
 
 		#Termination criterion
 		tempstart = time()
@@ -212,7 +224,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 			println("No negative reduced costs found!")
 			break
 		end
-		
+
 		mag_iteration += 1
 		time5 += time() - tempstart
 
