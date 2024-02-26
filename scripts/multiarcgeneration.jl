@@ -124,7 +124,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 
 		#Get dual values
 		tempstart = time()
-		alpha1 = dual.(arccapacity)
+		alpha = dual.(arccapacity)
 		beta = dual.(flowbalance)
 		iota = dual.(nodecapacity)
 		time2 += time() - tempstart
@@ -142,7 +142,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 		for a in 1:mcfinstance.numarcs
 			arcredcosts[:,a] += c_mag[:, 1] * transpose(mcfinstance.q)
 		end
-		arcredcosts += c_mag[:, 1] * transpose(mcfinstance.q) - alpha1 * transpose(mcfinstance.q)
+		arcredcosts += c_mag[:, 1] * transpose(mcfinstance.q) - alpha * transpose(mcfinstance.q)
 
 		#Optimized relay
 		arcredcosts = zeros(numorders, extendednumarcs)

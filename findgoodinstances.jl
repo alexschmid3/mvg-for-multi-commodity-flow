@@ -7,6 +7,8 @@ include("scripts/capacitytuning.jl")
 include("scripts/solvemcfinstance.jl")
 include("scripts/writerunresults.jl")
 include("scripts/multiarcgeneration.jl")
+include("scripts/columngeneration.jl")
+include("scripts/solvepathmcfinstance.jl")
 
 #-------------------------------PARAMETERS--------------------------------#
 
@@ -33,8 +35,10 @@ mincapacityperturb = 0.5
 maxcapacityperturb = 1.5
 commodities = 1:numcom
 
-timegoal_arcdict = Dict(100=>15, 200=>45, 400=>60)
-timegoal_nodedict = Dict(100=>40, 200=>90, 400=>120)
+#timegoal_arcdict = Dict(100=>15, 200=>45, 400=>60)
+#timegoal_nodedict = Dict(100=>40, 200=>90, 400=>120)
+timegoal_arcdict = Dict(100=>30, 200=>60, 400=>90)
+timegoal_nodedict = Dict(100=>120, 200=>180, 400=>240)
 
 #Time goals for solving MCF instances
 timegoal_arc = timegoal_arcdict[numcom] #numnodes/3 #0*60
@@ -88,6 +92,5 @@ obj_cg, cg_iterations, pathSet_converged, pathcost_converged, delta_converged, r
 writerunresults(outputfilename, "CG", mcfinstance, obj_cg, rmp_time, cgsp_time_par, 0, cg_fulltime, cg_iterations, 0, sum(length(pathSet_converged[k]) for k in mcfinstance.commodities), 0)
 
 println("-------- CG IP ---------")
-include("scripts/solvepathmcfinstance.jl")
 obj_cgip, solvetime_cgip = solvepathmcfinstance(0, pathSet_converged, pathcost_converged, delta_converged, mcfinstance)
 writerunresults(outputfilename, "CGIP", mcfinstance, obj_cgip, 0, 0, solvetime_cgip, solvetime_cgip, 0, 0, sum(length(pathSet_converged[k]) for k in mcfinstance.commodities), 0)

@@ -26,15 +26,14 @@ end
 
 #--------------------------------------------------------------------------------------------#
 
-function writeinstancetofile(iter, currgamma, gamma_node, numarcs, total_time, goodinstance_flag)
+function writeinstancetofile(iter, gamma_arc, gamma_node, numarcs, total_time, goodinstance_flag)
 
     df = DataFrame(experiment_id = [runid],
 			randomseed = [randomseedval],
 			numcom = [numcom], 
 			numnodes = [numnodes], 
 			radius = [radius], 
-			gamma_init = [gamma_arc_init], 
-			gamma_arc = [currgamma], 
+			gamma_arc = [gamma_arc], 
 			gamma_node = [gamma_node],
 			opt_gap = [opt_gap], 
 			numarcs = [numarcs], 
@@ -68,7 +67,7 @@ function arccapacitytuning(gamma_arc_init, gamma_node, timegoal, maxtuningiterat
     if maxtuningiterations == 0
         d, p = setcapacities(currgamma, gamma_node, q, numarcs, nodes, arcperturbation, nodeperturbation)
         mcfinstance = (commodities=commodities, numarcs=numarcs, nodes=nodes, c=c, q=q, p=p, d=d, b=b, A_plus=A_plus, A_minus=A_minus, coordinates=coordinates, arcs=arcs, arcLookup=arcLookup, Origin=Origin, Destination=Destination)
-        return currgamma, 1, mcfinstance
+        return currgamma, 1, mcfinstance, iter
     end
 
     #Capacity tuning loop
@@ -95,18 +94,18 @@ function arccapacitytuning(gamma_arc_init, gamma_node, timegoal, maxtuningiterat
 
         #Check termination criterion
         if (goodinstance_flag == 1) || (iter > maxtuningiterations)
-            return bestfeasiblegamma, goodinstance_flag, mcfinstance
+            return bestfeasiblegamma, goodinstance_flag, mcfinstance, iter
         end
 
     end
 
-    return bestfeasiblegamma, goodinstance_flag, ()
+    return bestfeasiblegamma, goodinstance_flag, (), iter
 
 end
 
 #--------------------------------------------------------------------------------------------#
 
-function nodecapacitytuning(gamma_arc, gamma_node_init, timegoal, maxtuningiterations)
+function nodecapacitytuning(gamma_arc, gamma_node_init, timegoal, maxtuningiterations, startiter)
 
     coordinates, commodities, nodes, arcs, arcLookup, numarcs, A_minus, A_plus, c, b, q, Origin, Destination = randomizeinstance(randomseedval)
     arcperturbation, nodeperturbation = randomizeperturbations(numarcs, nodes, randomseedval)
@@ -116,7 +115,7 @@ function nodecapacitytuning(gamma_arc, gamma_node_init, timegoal, maxtuningitera
     goodinstance_flag = 0
     bestfeasiblegamma = 0
     bestinfeasiblegamma = 50*gamma_node_init
-    iter = 1
+    iter = startiter + 1
 
     #Terminate if no tuning iterations
     if maxtuningiterations == 0
@@ -160,9 +159,9 @@ end
 
 function capacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, timegoal_node, maxtuningiterations)
 
-    gamma_arc, goodinstance_flag_arc, arcmcfinstance = arccapacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, maxtuningiterations)
+    gamma_arc, goodinstance_flag_arc, arcmcfinstance, startiter = arccapacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, maxtuningiterations)
     if goodinstance_flag_arc == 1
-        gamma_node, goodinstance_flag, finalmcfinstance = nodecapacitytuning(gamma_arc, gamma_node_init, timegoal_node, maxtuningiterations)
+        gamma_node, goodinstance_flag, finalmcfinstance = nodecapacitytuning(gamma_arc, gamma_node_init, timegoal_node, maxtuningiterations, startiter)
     else
         println("Sorry, no instance found during arc tuning")
         return gamma_arc, gamma_node_init, arcmcfinstance, 0
