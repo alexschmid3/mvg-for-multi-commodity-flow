@@ -20,6 +20,15 @@ function checkoptimizationoutput(terminationstatus, solvetime, hasvalues, currga
     elseif (terminationstatus == MOI.TIME_LIMIT) && !(hasvalues)
         println("Infeasible by time limit")
         return 0, "Inf", round((currgamma + bestfeasiblegamma) / 2, digits=0), currgamma, bestfeasiblegamma
+
+    elseif (terminationstatus == MOI.SOLUTION_LIMIT) && (hasvalues) & (solvetime >= timegoal)
+        println("Good instance = ", solvetime)
+        return 1, solvetime, currgamma, bestinfeasiblegamma, currgamma
+
+    elseif (terminationstatus == MOI.SOLUTION_LIMIT) && (hasvalues) & (solvetime < timegoal)
+        println("Too short = ", solvetime)
+        return 0, solvetime, round((currgamma + bestinfeasiblegamma) / 2, digits=0), bestinfeasiblegamma, currgamma
+
     end
 
 end

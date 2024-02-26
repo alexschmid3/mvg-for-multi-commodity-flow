@@ -12,7 +12,7 @@ include("scripts/solvepathmcfinstance.jl")
 
 #-------------------------------PARAMETERS--------------------------------#
 
-runid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+#runid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 println("runid = $runid")
 paramsfilename = "data/findgoodinstances_2024.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
