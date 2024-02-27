@@ -184,7 +184,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 			if onearcatatime_flag == 0
 				minreducedcost_k, shortestpathnodes, shortestpatharcs = findshortestpath_mcf(0, k, arcredcosts, numnodes, mcfinstance.numarcs, mcfinstance.arcs, mcfinstance.arcLookup, mcfinstance.Origin, mcfinstance.Destination)
 			elseif onearcatatime_flag == 1
-				shortestpatharcs = arg_n_smallest_values(arcredcosts[k,:],10) 
+				shortestpatharcs = arg_n_smallest_values(arcredcosts[k,:],5) 
 				minreducedcost_k = minimum(arcredcosts[k,:]) 
 			end
 			push!(min_rc_list, minreducedcost_k)
