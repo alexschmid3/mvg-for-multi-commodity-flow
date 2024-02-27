@@ -9,6 +9,7 @@ include("scripts/writerunresults.jl")
 include("scripts/multiarcgeneration.jl")
 include("scripts/columngeneration.jl")
 include("scripts/solvepathmcfinstance.jl")
+include("scripts/getbasisarcs.jl")
 
 #-------------------------------PARAMETERS--------------------------------#
 
@@ -20,8 +21,8 @@ randomseedval = expparms[runid, 2]
 numcom = expparms[runid, 3]
 numnodes = expparms[runid, 4]		
 radius = expparms[runid, 5]	
-gamma_arc_init = 5000 #expparms[runid, 6]	
-gamma_node_init = 5000 #expparms[runid, 7]
+gamma_arc_init = expparms[runid, 6]	
+gamma_node_init = expparms[runid, 7]
 opt_gap = expparms[runid, 8]
 
 println("Seed = ", randomseedval)	
@@ -43,7 +44,7 @@ timegoal_nodedict = Dict(100=>120, 200=>120, 400=>180)
 #Time goals for solving MCF instances
 timegoal_arc = timegoal_arcdict[numcom] #numnodes/3 #0*60
 timegoal_node = timegoal_nodedict[numcom] #numnodes/2 #30*60
-maxtuningiterations = 20
+maxtuningiterations = 0
 
 #Algorithm parameters
 iptimelimit = 60*60*2
@@ -60,8 +61,8 @@ gamma_arc, gamma_node, mcfinstance, foundgoodinstance_flag = capacitytuning(gamm
 
 #----------------------------SOLVE INSTANCE-------------------------------#
 
-#include("scripts/drawmap.jl")
-#drawmap("networkmap.png", mcfinstance, 2000, 2000)
+#=include("scripts/drawmap.jl")
+drawmap("networkmap.png", mcfinstance, 2000, 2000)=#
 
 fullarccount = sum(mcfinstance.numarcs for k in mcfinstance.commodities)
 fullpathcount = 0
@@ -79,7 +80,7 @@ writerunresults(outputfilename, "IP", mcfinstance, obj_ip, 0, 0, solvetime_ip, s
 #MAG
 println("---------- MAG ---------")
 c_mag, d_mag, magarcs, numarcs_dummy, dummydeletions = colgeninitialize(mcfinstance)
-obj_mag, mag_iterations, magarcs, smp_time, magsp_time_par, fullalgtime = multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, dummydeletions)
+obj_mag, mag_iterations, magarcs, smp_time, magsp_time_par, fullalgtime = multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, dummydeletions, 0)
 writerunresults(outputfilename, "MAG", mcfinstance, obj_mag, smp_time, magsp_time_par, 0, fullalgtime, mag_iterations, sum(length(magarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
 
 println("-------- MAG IP --------")
@@ -95,3 +96,20 @@ writerunresults(outputfilename, "CG", mcfinstance, obj_cg, rmp_time, cgsp_time_p
 println("-------- CG IP ---------")
 obj_cgip, solvetime_cgip = solvepathmcfinstance(0, pathSet_converged, pathcost_converged, delta_converged, mcfinstance)
 writerunresults(outputfilename, "CGIP", mcfinstance, obj_cgip, 0, 0, solvetime_cgip, solvetime_cgip, 0, 0, sum(length(pathSet_converged[k]) for k in mcfinstance.commodities), 0)
+
+#LP basis
+println("------- BASIS IP -------")
+basisarcs = getbasisarcs(mcfinstance, x_lp)
+obj_bip, x_bip, termination_bip, solvetime_bip, hasvalues_bip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", basisarcs)
+writerunresults(outputfilename, "BasisIP", mcfinstance, obj_bip, solvetime_lp, 0, solvetime_bip, solvetime_lp+solvetime_bip, 0, sum(length(basisarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
+
+#SAG
+println("---------- SAG ---------")
+c_sag, d_sag, sagarcs, numarcs_dummy, dummydeletions = colgeninitialize(mcfinstance)
+obj_sag, sag_iterations, sagarcs, smp_time, sagsp_time_par, fullalgtime = multiarcgeneration!(mcfinstance, sagarcs, c_sag, d_sag, numarcs_dummy, dummydeletions, 1)
+writerunresults(outputfilename, "SAG", mcfinstance, obj_sag, smp_time, sagsp_time_par, 0, fullalgtime, sag_iterations, sum(length(sagarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
+
+println("-------- SAG IP --------")
+obj_sagip, x_ip, termination_ip, solvetime_sagip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", sagarcs)
+writerunresults(outputfilename, "SAGIP", mcfinstance, obj_sagip, 0, 0, solvetime_sagip, solvetime_sagip, 0, sum(length(sagarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
+

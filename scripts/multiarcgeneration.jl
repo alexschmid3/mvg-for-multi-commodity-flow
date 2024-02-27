@@ -113,7 +113,19 @@ end
 
 #--------------------------------------------------------------------------------------------#
 
-function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, dummydeletions)
+function arg_n_smallest_values(A::AbstractArray{T,N}, n::Integer) where {T,N}
+	arcindices = []
+	perm = sortperm(vec(A))
+	ci = CartesianIndices(A)
+	for i in ci[perm[1:n]]
+		push!(arcindices, i[1])
+	end
+	return arcindices
+end
+
+#--------------------------------------------------------------------------------------------#
+
+function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, dummydeletions, onearcatatime_flag)
 
 	#Initialize
 	mag_iteration = 1
@@ -169,12 +181,17 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 		dptimelist = []
 		for k in mcfinstance.commodities
 			thisiterstarttime = time()
-			minreducedcost_k, shortestpathnodes, shortestpatharcs = findshortestpath_mcf(0, k, arcredcosts, numnodes, mcfinstance.numarcs, mcfinstance.arcs, mcfinstance.arcLookup, mcfinstance.Origin, mcfinstance.Destination)
+			if onearcatatime_flag == 0
+				minreducedcost_k, shortestpathnodes, shortestpatharcs = findshortestpath_mcf(0, k, arcredcosts, numnodes, mcfinstance.numarcs, mcfinstance.arcs, mcfinstance.arcLookup, mcfinstance.Origin, mcfinstance.Destination)
+			elseif onearcatatime_flag == 1
+				shortestpatharcs = arg_n_smallest_values(arcredcosts[k,:],10) 
+				minreducedcost_k = minimum(arcredcosts[k,:]) 
+			end
 			push!(min_rc_list, minreducedcost_k)
 
 			#Add new arcs to current arc sets
 			if minreducedcost_k < -0.001
-				for a in shortestpatharcs
+				for a in [a2 for a2 in shortestpatharcs if arcredcosts[k,a2] < -0.001]
 					if !(a in magarcs.A[k])
 						push!(addarcs, (k,a))
 						push!(magarcs.A[k], a)
