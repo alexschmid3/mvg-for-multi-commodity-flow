@@ -44,7 +44,7 @@ timegoal_nodedict = Dict(100=>120, 200=>120, 400=>180)
 #Time goals for solving MCF instances
 timegoal_arc = timegoal_arcdict[numcom] #numnodes/3 #0*60
 timegoal_node = timegoal_nodedict[numcom] #numnodes/2 #30*60
-maxtuningiterations = 0
+maxtuningiterations = 20
 
 #Algorithm parameters
 iptimelimit = 60*60*2
