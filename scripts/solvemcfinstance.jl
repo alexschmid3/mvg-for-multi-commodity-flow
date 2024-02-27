@@ -1,12 +1,12 @@
 
-function solvemcfinstance(mcfinstance, lprelaxflag, timegoal, nodecapacity_flag, usage, reducedarcs)
+function solvemcfinstance(mcfinstance, lprelaxflag, timegoal, nodecapacity_flag, usage, reducedarcs, outputflag)
 
     #Write MCF IP
     m = Model(Gurobi.Optimizer)
 
     set_optimizer_attribute(m, "TimeLimit", timegoal+1)
-    set_optimizer_attribute(m, "OutputFlag", 0)
-    set_optimizer_attribute(m, "LogToConsole", 0)
+    set_optimizer_attribute(m, "OutputFlag", outputflag)
+    set_optimizer_attribute(m, "LogToConsole", outputflag)
     set_optimizer_attribute(m, "MIPGap", opt_gap)
     
     if usage == "reducedsolve"

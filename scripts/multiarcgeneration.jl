@@ -184,14 +184,15 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 			if onearcatatime_flag == 0
 				minreducedcost_k, shortestpathnodes, shortestpatharcs = findshortestpath_mcf(0, k, arcredcosts, numnodes, mcfinstance.numarcs, mcfinstance.arcs, mcfinstance.arcLookup, mcfinstance.Origin, mcfinstance.Destination)
 			elseif onearcatatime_flag == 1
-				shortestpatharcs = arg_n_smallest_values(arcredcosts[k,:],5) 
+				smallestrcarcs = arg_n_smallest_values(arcredcosts[k,:],5) 
+				shortestpatharcs = [a2 for a2 in smallestrcarcs if arcredcosts[k,a2] < -0.001]
 				minreducedcost_k = minimum(arcredcosts[k,:]) 
 			end
 			push!(min_rc_list, minreducedcost_k)
 
 			#Add new arcs to current arc sets
 			if minreducedcost_k < -0.001
-				for a in [a2 for a2 in shortestpatharcs if arcredcosts[k,a2] < -0.001]
+				for a in shortestpatharcs #
 					if !(a in magarcs.A[k])
 						push!(addarcs, (k,a))
 						push!(magarcs.A[k], a)
@@ -215,7 +216,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 
 		#Add new variables 
 		tempstart2 = time()
-		println("Length of arcs = ", length(addarcs))
+		println("Arcs added = ", length(addarcs))
 		for (k,a) in addarcs
 			#Create a new variable for the arc
 			global x[k,a] = @variable(m, lower_bound = 0) #, upper_bound = 1)

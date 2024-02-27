@@ -83,8 +83,8 @@ function columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 
 		#Solve pricing subproblem
 		min_rc_list = []
-		addarcs = []
 		dptimelist = []
+		pathsadded = 0
 		for k in mcfinstance.commodities
 			thisiterstarttime = time()
 			minreducedcost_k, shortestpathnodes, shortestpatharcs = findshortestpath_mcf(0, k, arcredcosts, numnodes, mcfinstance.numarcs, mcfinstance.arcs, mcfinstance.arcLookup, mcfinstance.Origin, mcfinstance.Destination)
@@ -125,9 +125,13 @@ function columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 					set_normalized_coefficient(nodecapacity[n], y[k,p], totalcoeff)
 				end
 				set_normalized_coefficient(assignment[k], y[k,p], 1.0)
+
+				pathsadded += 1
 				
 			end
 		end
+
+		println("Paths added = ", pathsadded)
 
 	 	min_rc = minimum(min_rc_list)
 

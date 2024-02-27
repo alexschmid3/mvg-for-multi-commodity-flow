@@ -36,22 +36,23 @@ mincapacityperturb = 0.5
 maxcapacityperturb = 1.5
 commodities = 1:numcom
 
-#timegoal_arcdict = Dict(100=>15, 200=>45, 400=>60)
-#timegoal_nodedict = Dict(100=>40, 200=>90, 400=>120)
-timegoal_arcdict = Dict(100=>30, 200=>60, 400=>75)
-timegoal_nodedict = Dict(100=>120, 200=>120, 400=>180)
-
 #Time goals for solving MCF instances
-timegoal_arc = timegoal_arcdict[numcom] #numnodes/3 #0*60
-timegoal_node = timegoal_nodedict[numcom] #numnodes/2 #30*60
-maxtuningiterations = 20
+#timegoal_arcdict = Dict(100=>30, 200=>60, 400=>75)
+#timegoal_nodedict = Dict(100=>120, 200=>120, 400=>180)
+timegoal_arc = expparms[runid, 9] #timegoal_arcdict[numcom] 
+timegoal_node = expparms[runid, 10] #timegoal_nodedict[numcom] 
+maxtuningiterations = expparms[runid, 11]
 
 #Algorithm parameters
-iptimelimit = 60*60*2
+iptimelimit = 3600
 
 #Output file name
 instancefilename = string("outputs/instancetuning_exp", runid, ".csv")
 outputfilename = string("outputs/mcfalgorithms_exp", runid, ".csv")
+instancefolder = string("instances/mcf", numnodes,"_instance", runid)
+if !(isdir(instancefolder))
+    mkdir(instancefolder)
+end
 
 #---------------------------GENERATE INSTANCE-----------------------------#
 
@@ -61,20 +62,23 @@ gamma_arc, gamma_node, mcfinstance, foundgoodinstance_flag = capacitytuning(gamm
 
 #----------------------------SOLVE INSTANCE-------------------------------#
 
-#=include("scripts/drawmap.jl")
-drawmap("networkmap.png", mcfinstance, 2000, 2000)=#
+include("scripts/drawmap.jl")
+drawmap(string(instancefolder, "/networkmap.png"), mcfinstance, 2000, 2000)
 
 fullarccount = sum(mcfinstance.numarcs for k in mcfinstance.commodities)
 fullpathcount = 0
+println("Total arcs = $fullarccount")
+
+#=
 
 #LP
 println("---------- LP ----------")
-obj_lp, x_lp, termination_lp, solvetime_lp, hasvalues_lp = solvemcfinstance(mcfinstance, 1, iptimelimit, 1, "fullsolve", [])
+obj_lp, x_lp, termination_lp, solvetime_lp, hasvalues_lp = solvemcfinstance(mcfinstance, 1, iptimelimit, 1, "fullsolve", [], 0)
 writerunresults(outputfilename, "LP", mcfinstance, obj_lp, solvetime_lp, 0, 0, solvetime_lp, 0, fullarccount, fullpathcount, 1)
 
 #IP
 println("---------- IP ----------")
-obj_ip, x_ip, termination_ip, solvetime_ip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "fullsolve", [])
+obj_ip, x_ip, termination_ip, solvetime_ip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "fullsolve", [], 1)
 writerunresults(outputfilename, "IP", mcfinstance, obj_ip, 0, 0, solvetime_ip, solvetime_ip, 0, fullarccount, fullpathcount, 0)
 
 #MAG
@@ -84,7 +88,7 @@ obj_mag, mag_iterations, magarcs, smp_time, magsp_time_par, fullalgtime = multia
 writerunresults(outputfilename, "MAG", mcfinstance, obj_mag, smp_time, magsp_time_par, 0, fullalgtime, mag_iterations, sum(length(magarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
 
 println("-------- MAG IP --------")
-obj_magip, x_ip, termination_ip, solvetime_magip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", magarcs)
+obj_magip, x_ip, termination_ip, solvetime_magip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", magarcs, 0)
 writerunresults(outputfilename, "MAGIP", mcfinstance, obj_magip, 0, 0, solvetime_magip, solvetime_magip, 0, sum(length(magarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
 
 #CG
@@ -100,7 +104,7 @@ writerunresults(outputfilename, "CGIP", mcfinstance, obj_cgip, 0, 0, solvetime_c
 #LP basis
 println("------- BASIS IP -------")
 basisarcs = getbasisarcs(mcfinstance, x_lp)
-obj_bip, x_bip, termination_bip, solvetime_bip, hasvalues_bip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", basisarcs)
+obj_bip, x_bip, termination_bip, solvetime_bip, hasvalues_bip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", basisarcs, 0)
 writerunresults(outputfilename, "BasisIP", mcfinstance, obj_bip, solvetime_lp, 0, solvetime_bip, solvetime_lp+solvetime_bip, 0, sum(length(basisarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
 
 #SAG
@@ -110,6 +114,7 @@ obj_sag, sag_iterations, sagarcs, smp_time, sagsp_time_par, fullalgtime = multia
 writerunresults(outputfilename, "SAG", mcfinstance, obj_sag, smp_time, sagsp_time_par, 0, fullalgtime, sag_iterations, sum(length(sagarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
 
 println("-------- SAG IP --------")
-obj_sagip, x_ip, termination_ip, solvetime_sagip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", sagarcs)
+obj_sagip, x_ip, termination_ip, solvetime_sagip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", sagarcs, 0)
 writerunresults(outputfilename, "SAGIP", mcfinstance, obj_sagip, 0, 0, solvetime_sagip, solvetime_sagip, 0, sum(length(sagarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
 
+=#

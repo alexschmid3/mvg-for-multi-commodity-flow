@@ -86,7 +86,7 @@ function arccapacitytuning(gamma_arc_init, gamma_node, timegoal, maxtuningiterat
         mcfinstance = (commodities=commodities, numarcs=numarcs, nodes=nodes, c=c, q=q, p=p, d=d, b=b, A_plus=A_plus, A_minus=A_minus, coordinates=coordinates, arcs=arcs, arcLookup=arcLookup, Origin=Origin, Destination=Destination)
 
         #Solve the instance 
-        model, terminationstatus, solvetime, hasvalues = solvemcfinstance(mcfinstance, 0, timegoal, 0, "tuning", [])
+        model, terminationstatus, solvetime, hasvalues = solvemcfinstance(mcfinstance, 0, timegoal, 0, "tuning", [], 0)
         
         #Check Gurobi output and update gammas accordingly
         println("$terminationstatus, $solvetime, $hasvalues, $currgamma, $bestinfeasiblegamma, $bestfeasiblegamma, $timegoal")
@@ -137,7 +137,7 @@ function nodecapacitytuning(gamma_arc, gamma_node_init, timegoal, maxtuningitera
         mcfinstance = (commodities=commodities, numarcs=numarcs, nodes=nodes, c=c, q=q, p=p, d=d, b=b, A_plus=A_plus, A_minus=A_minus, coordinates=coordinates, arcs=arcs, arcLookup=arcLookup, Origin=Origin, Destination=Destination)
 
         #Solve the instance 
-        model, terminationstatus, solvetime, hasvalues = solvemcfinstance(mcfinstance, 0, timegoal, 1, "tuning", [])
+        model, terminationstatus, solvetime, hasvalues = solvemcfinstance(mcfinstance, 0, timegoal, 1, "tuning", [], 0)
         
         #Check Gurobi output and update gammas accordingly
         goodinstance_flag, total_time, currgamma, bestinfeasiblegamma, bestfeasiblegamma = checkoptimizationoutput(terminationstatus, solvetime, hasvalues, currgamma, bestinfeasiblegamma, bestfeasiblegamma, timegoal)
@@ -160,6 +160,34 @@ end
 
 #--------------------------------------------------------------------------------------------#
 
+function writeinstancetofolder(instancefolder, mcfinstance)
+
+    df1 = DataFrame(
+        node = [n for n in 1:numnodes], 
+        x_coord = [coordinates[n,1] for n in 1:numnodes], 
+        y_coord = [coordinates[n,1] for n in 1:numnodes], 
+        capacity = [mcfinstance.p[n] for n in 1:numnodes]
+    )
+    CSV.write(string(instancefolder, "/nodes.csv"), df1)
+
+    df2 = DataFrame(
+        arc = [n for n in 1:numarcs], 
+        originnode = [arcs[a][1] for a in 1:numarcs], 
+        destinationnode = [arcs[a][2] for a in 1:numarcs], 
+        capacity = [mcfinstance.d[a] for a in 1:numarcs]
+    )
+    CSV.write(string(instancefolder, "/arcs.csv"), df2)
+
+    df3 = DataFrame(
+        commodity = [k for k in 1:numcom],  
+        quantity = [mcfinstance.q[k] for k in 1:numcom]
+    )
+    CSV.write(string(instancefolder, "/commodities.csv"), df3)
+
+end
+
+#--------------------------------------------------------------------------------------------#
+
 function capacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, timegoal_node, maxtuningiterations)
 
     gamma_arc, goodinstance_flag_arc, arcmcfinstance, startiter = arccapacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, maxtuningiterations)
@@ -174,6 +202,7 @@ function capacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, timegoal_
     end
 
     if goodinstance_flag == 1
+        writeinstancetofolder(instancefolder, finalmcfinstance)
         return gamma_arc, gamma_node, finalmcfinstance, goodinstance_flag
     else
         println("Sorry, no good instance found during node tuning")
@@ -181,3 +210,4 @@ function capacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, timegoal_
     end
 
 end
+
