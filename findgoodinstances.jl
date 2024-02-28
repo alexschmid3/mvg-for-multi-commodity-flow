@@ -69,8 +69,6 @@ fullarccount = sum(mcfinstance.numarcs for k in mcfinstance.commodities)
 fullpathcount = 0
 println("Total arcs = $fullarccount")
 
-#=
-
 #LP
 println("---------- LP ----------")
 obj_lp, x_lp, termination_lp, solvetime_lp, hasvalues_lp = solvemcfinstance(mcfinstance, 1, iptimelimit, 1, "fullsolve", [], 0)
@@ -116,5 +114,3 @@ writerunresults(outputfilename, "SAG", mcfinstance, obj_sag, smp_time, sagsp_tim
 println("-------- SAG IP --------")
 obj_sagip, x_ip, termination_ip, solvetime_sagip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", sagarcs, 0)
 writerunresults(outputfilename, "SAGIP", mcfinstance, obj_sagip, 0, 0, solvetime_sagip, solvetime_sagip, 0, sum(length(sagarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
-
-=#
