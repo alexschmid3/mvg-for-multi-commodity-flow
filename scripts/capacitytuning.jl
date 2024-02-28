@@ -81,6 +81,8 @@ function arccapacitytuning(gamma_arc_init, gamma_node, timegoal, maxtuningiterat
         
         println("---------- Iteration $iter arc gamma = ", currgamma, " ----------")
 
+        thisitergamma = copy(currgamma)
+
         #Set the capacities based on the gammas
         d, p = setcapacities(currgamma, gamma_node, q, numarcs, nodes, arcperturbation, nodeperturbation)
         mcfinstance = (commodities=commodities, numarcs=numarcs, nodes=nodes, c=c, q=q, p=p, d=d, b=b, A_plus=A_plus, A_minus=A_minus, coordinates=coordinates, arcs=arcs, arcLookup=arcLookup, Origin=Origin, Destination=Destination)
@@ -93,7 +95,7 @@ function arccapacitytuning(gamma_arc_init, gamma_node, timegoal, maxtuningiterat
         goodinstance_flag, total_time, currgamma, bestinfeasiblegamma, bestfeasiblegamma = checkoptimizationoutput(terminationstatus, solvetime, hasvalues, currgamma, bestinfeasiblegamma, bestfeasiblegamma, timegoal)
 
         #Write instance to file
-        writeinstancetofile(iter, currgamma, gamma_node, numarcs, total_time, 0.5*goodinstance_flag)
+        writeinstancetofile(iter, thisitergamma, gamma_node, numarcs, total_time, 0.5*goodinstance_flag)
 
         #Iterate
         iter += 1
@@ -132,6 +134,8 @@ function nodecapacitytuning(gamma_arc, gamma_node_init, timegoal, maxtuningitera
         
         println("---------- Iteration $iter node gamma = ", currgamma, " ---------")
 
+        thisitergamma = copy(currgamma)
+
         #Set the capacities based on the gammas
         d, p = setcapacities(gamma_arc, currgamma, q, numarcs, nodes, arcperturbation, nodeperturbation)
         mcfinstance = (commodities=commodities, numarcs=numarcs, nodes=nodes, c=c, q=q, p=p, d=d, b=b, A_plus=A_plus, A_minus=A_minus, coordinates=coordinates, arcs=arcs, arcLookup=arcLookup, Origin=Origin, Destination=Destination)
@@ -143,7 +147,7 @@ function nodecapacitytuning(gamma_arc, gamma_node_init, timegoal, maxtuningitera
         goodinstance_flag, total_time, currgamma, bestinfeasiblegamma, bestfeasiblegamma = checkoptimizationoutput(terminationstatus, solvetime, hasvalues, currgamma, bestinfeasiblegamma, bestfeasiblegamma, timegoal)
 
         #Write instance to file
-        writeinstancetofile(iter, gamma_arc, currgamma, numarcs, total_time, goodinstance_flag)
+        writeinstancetofile(iter, gamma_arc, thisitergamma, numarcs, total_time, goodinstance_flag)
 
         iter += 1
 
