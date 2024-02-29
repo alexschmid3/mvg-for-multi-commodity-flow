@@ -13,9 +13,9 @@ include("scripts/getbasisarcs.jl")
 
 #-------------------------------PARAMETERS--------------------------------#
 
-runid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+runid = 77 #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 println("runid = $runid")
-paramsfilename = "data/findgoodinstances_2024.csv"
+paramsfilename = "data/potentialinstances.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
 randomseedval = expparms[runid, 2]		
 numcom = expparms[runid, 3]
@@ -60,14 +60,15 @@ coordinates, commodities, nodes, arcs, arcLookup, numarcs, A_minus, A_plus, c, b
 arcperturbation, nodeperturbation = randomizeperturbations(numarcs, nodes, randomseedval)
 gamma_arc, gamma_node, mcfinstance, foundgoodinstance_flag = capacitytuning(gamma_arc_init, gamma_node_init, timegoal_arc, timegoal_node, maxtuningiterations)
 
-#----------------------------SOLVE INSTANCE-------------------------------#
-
-include("scripts/drawmap.jl")
-drawmap(string(instancefolder, "/networkmap.png"), mcfinstance, 2000, 2000)
-
 fullarccount = sum(mcfinstance.numarcs for k in mcfinstance.commodities)
 fullpathcount = 0
 println("Total arcs = $fullarccount")
+
+#Draw network
+include("scripts/drawmap.jl")
+drawmap(string(instancefolder, "/networkmap.png"), mcfinstance, 2000, 2000)
+
+#----------------------------SOLVE INSTANCE-------------------------------#
 
 #LP
 println("---------- LP ----------")

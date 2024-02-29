@@ -238,7 +238,7 @@ function multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, 
 
 		#Termination criterion
 		tempstart = time()
-		if min_rc >= -0.0001
+		if min_rc >= -0.001
 			println("No negative reduced costs found!")
 			break
 		end

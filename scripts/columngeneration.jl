@@ -142,7 +142,7 @@ function columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 		parallel_time += sum(dptimelistsums) -  maximum(dptimelistsums)
 
 		#Termination criterion
-		if min_rc >= -0.0001
+		if min_rc >= -0.001
 			println("No negative reduced costs found!")
 			break
 		end
