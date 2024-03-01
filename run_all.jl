@@ -13,7 +13,7 @@ include("scripts/getbasisarcs.jl")
 
 #-------------------------------PARAMETERS--------------------------------#
 
-runid = 77 #ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
+runid = ifelse(length(ARGS) > 0, parse(Int, ARGS[1]), 1)
 println("runid = $runid")
 paramsfilename = "data/potentialinstances.csv"
 expparms = CSV.read(paramsfilename, DataFrame)
@@ -69,7 +69,7 @@ include("scripts/drawmap.jl")
 drawmap(string(instancefolder, "/networkmap.png"), mcfinstance, 2000, 2000)
 
 #----------------------------SOLVE INSTANCE-------------------------------#
-
+#=
 #LP
 println("---------- LP ----------")
 obj_lp, x_lp, termination_lp, solvetime_lp, hasvalues_lp = solvemcfinstance(mcfinstance, 1, iptimelimit, 1, "fullsolve", [], 0)
@@ -79,16 +79,16 @@ writerunresults(outputfilename, "LP", mcfinstance, obj_lp, solvetime_lp, 0, 0, s
 println("---------- IP ----------")
 obj_ip, x_ip, termination_ip, solvetime_ip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "fullsolve", [], 1)
 writerunresults(outputfilename, "IP", mcfinstance, obj_ip, 0, 0, solvetime_ip, solvetime_ip, 0, fullarccount, fullpathcount, 0)
-
+=#
 #MAG
 println("---------- MAG ---------")
 c_mag, d_mag, magarcs, numarcs_dummy, dummydeletions = colgeninitialize(mcfinstance)
 obj_mag, mag_iterations, magarcs, smp_time, magsp_time_par, fullalgtime = multiarcgeneration!(mcfinstance, magarcs, c_mag, d_mag, numarcs_dummy, dummydeletions, 0)
-writerunresults(outputfilename, "MAG", mcfinstance, obj_mag, smp_time, magsp_time_par, 0, fullalgtime, mag_iterations, sum(length(magarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
+writerunresults(outputfilename, "MAG", mcfinstance, obj_mag, smp_time, magsp_time_par, 0, fullalgtime, mag_iterations, sum(length(magarcs.A[k]) for k in mcfinstance.commodities), 0, 1)
 
-println("-------- MAG IP --------")
-obj_magip, x_ip, termination_ip, solvetime_magip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", magarcs, 0)
-writerunresults(outputfilename, "MAGIP", mcfinstance, obj_magip, 0, 0, solvetime_magip, solvetime_magip, 0, sum(length(magarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
+#println("-------- MAG IP --------")
+#obj_magip, x_ip, termination_ip, solvetime_magip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", magarcs, 0)
+#writerunresults(outputfilename, "MAGIP", mcfinstance, obj_magip, 0, 0, solvetime_magip, solvetime_magip, 0, sum(length(magarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
 
 #CG
 println("---------- CG ----------")
@@ -96,6 +96,7 @@ delta, pathcost, pathSet = orderpathinitialization(c_mag, mcfinstance, numarcs_d
 obj_cg, cg_iterations, pathSet_converged, pathcost_converged, delta_converged, rmp_time, cgsp_time_par, cg_fulltime, y_pb = columngeneration!(pathSet, pathcost, delta, mcfinstance, numarcs_dummy)
 writerunresults(outputfilename, "CG", mcfinstance, obj_cg, rmp_time, cgsp_time_par, 0, cg_fulltime, cg_iterations, 0, sum(length(pathSet_converged[k]) for k in mcfinstance.commodities), 0)
 
+#=
 println("-------- CG IP ---------")
 obj_cgip, solvetime_cgip = solvepathmcfinstance(0, pathSet_converged, pathcost_converged, delta_converged, mcfinstance)
 writerunresults(outputfilename, "CGIP", mcfinstance, obj_cgip, 0, 0, solvetime_cgip, solvetime_cgip, 0, 0, sum(length(pathSet_converged[k]) for k in mcfinstance.commodities), 0)
@@ -115,3 +116,4 @@ writerunresults(outputfilename, "SAG", mcfinstance, obj_sag, smp_time, sagsp_tim
 println("-------- SAG IP --------")
 obj_sagip, x_ip, termination_ip, solvetime_sagip, hasvalues_ip = solvemcfinstance(mcfinstance, 0, iptimelimit, 1, "reducedsolve", sagarcs, 0)
 writerunresults(outputfilename, "SAGIP", mcfinstance, obj_sagip, 0, 0, solvetime_sagip, solvetime_sagip, 0, sum(length(sagarcs.A[k]) for k in mcfinstance.commodities), 0, 0)
+=#

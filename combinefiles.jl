@@ -1,5 +1,5 @@
 
-figuredirectory = string("outputs")
+figuredirectory = string("outputs/coord2/")
 
 #Get list of files
 filelist = readdir(figuredirectory)
@@ -44,6 +44,7 @@ for t in filetypes
 			    end
 			end
 		end
+		
 	end
 
 end 
